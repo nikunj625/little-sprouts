@@ -257,7 +257,12 @@ async function doAuth(){
   msg.textContent='Please wait…';
   try{let res=authMode==='signup'?await SB.auth.signUp({email,password:pass}):await SB.auth.signInWithPassword({email,password:pass});
     if(res.error){msg.className='msg err';msg.textContent=res.error.message;return;}
-    if(!res.data.session){msg.className='msg ok';msg.textContent='Check your email to confirm, then sign in.';return;}
+    if(!res.data.session){
+      // Accounts are auto-confirmed server-side, so sign in directly (no email click needed).
+      const si=await SB.auth.signInWithPassword({email,password:pass});
+      if(si.error||!si.data.session){msg.className='msg ok';msg.textContent='Account created — tap “Sign in” to continue.';setAuthMode('signin');return;}
+      session=si.data.session;await afterLogin();return;
+    }
     session=res.data.session;await afterLogin();}
   catch(e){msg.className='msg err';msg.textContent='Something went wrong. Check your connection.';}
 }
