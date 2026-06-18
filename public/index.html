@@ -282,6 +282,8 @@ async function createFamily(){
 async function joinFamily(){
   const code=document.getElementById('joinCode').value.trim(),msg=document.getElementById('familyMsg');msg.className='msg';
   if(!code){msg.className='msg err';msg.textContent='Paste the family code.';return;}
+  const isUUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(code);
+  if(!isUUID){msg.className='msg err';msg.textContent='That doesn’t look like a family code. Ask your partner to tap “Copy family code” in ⚙️ Settings and paste the whole code here.';return;}
   msg.textContent='Joining…';
   try{const {error}=await SB.from('household_members').insert({household_id:code,user_id:session.user.id,role:'parent'});if(error)throw error;await loadHousehold(code);}
   catch(e){msg.className='msg err';msg.textContent='Invalid code or already joined.';}
